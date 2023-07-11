@@ -14,20 +14,27 @@
             private $UserAge = 0;
             private $UserCash;
 
-            public function __construct($userId)
+            public function __construct(Connection $connection, $userId)
             {
                 if($userId != 0)
                 {
-                    $database = new Connection();
-                    $result = $database->Query("SELECT * FROM `users` WHERE `user_id` = '$userId';");
+                    $result = $connection->Query("SELECT * FROM `users` WHERE `user_id` = '$userId';");
                     $result = mysqli_fetch_array($result);
                     $this->UserID = $result['user_id'];
                     $this->UserName = $result['user_name'];
-                    $this->UserCPF = $result['user_CPF'];
+                    $this->UserCPF = $result['user_cpf'];
                     $this->UserBornDate = $result['user_born_date'];
                     $this->UserAge = $this->GetUserAge();
                     $this->UserCash = $result['user_cash'];
-                    $database->Close();
+                }
+                else
+                {
+                    $this->UserID = 0;
+                    $this->UserName = 0;
+                    $this->UserCPF = 0;
+                    $this->UserBornDate = 0;
+                    $this->UserAge = 0;
+                    $this->UserCash = 0;
                 }
             }
 
@@ -44,23 +51,20 @@
                 else return $this->UserAge;
             }
 
-            public function RegisterUser($userName, $userCPF, $userBornDate)
+            public function RegisterUser(Connection $connection, $userName, $userCPF, $userBornDate)
             {
-                $database = new Connection();
-                $result = $database->Query("SELECT * FROM `users` WHERE `user_name` = '$userName' AND `user_cpf` = '$userCPF';");
-                if($result) 
+                $result = $connection->Query("SELECT * FROM `users` WHERE `user_name` = '$userName' AND `user_cpf` = '$userCPF';");
+                if(mysqli_num_rows($result)) 
                 {
-                    $database->Close();
                     return 0;
                 }
                 else
                 {
-                    $database->Query("INSERT INTO `users` (`user_name`, `user_CPF`, `user_born_date`) VALUES ($userName, $userCPF, $userBornDate);");
+                    $connection->Query("INSERT INTO `users` (`user_name`, `user_cpf`, `user_born_date`) VALUES ('$userName', '$userCPF', '$userBornDate');");
                     $this->UserName = $userName;
                     $this->UserCPF = $userCPF;
                     $this->UserBornDate = $userBornDate;
                     $this->UserAge = $this->GetUserAge();
-                    $database->Close();
                 }
             }
 
@@ -69,9 +73,9 @@
                 return $this->UserCash;
             }
             
-            public function SetUserCash(float $amount)
+            public function GiveUserCash(float $amount)
             {
-                $this->UserCash = $amount;
+                $this->UserCash += $amount;
             }
 
             public function GetUserName()
@@ -89,17 +93,14 @@
                 return $this->UserID;
             }
 
-            public function SaveUserData()
+            public function SaveUserData(Connection $connection)
             {
                 $name = $this->UserName;
                 $cash = $this->UserCash;
                 $born_date = $this->UserBornDate;
                 $CPF = $this->UserCPF;
-                $database = new Connection();
-                $database->Query("UPDATE `users` SET `user_name` = '$name', `user_cash` = '$cash', `user_born_date` = '$born_date', `user_cpf` = $CPF");
-                $database->Close();
+                $connection->Query("UPDATE `users` SET `user_name` = '$name', `user_cash` = '$cash', `user_born_date` = '$born_date', `user_cpf` = '$CPF'");
             }
-
         }
     }
 
