@@ -1,0 +1,2 @@
+# remove workflows or any other folder that we don't want to modify
+.github/
