@@ -25,6 +25,7 @@
                 $this->DataBase = $database;
                 $this->Port = $port;
                 $this->Socket = $socket;
+                $this->Connect();
             }
 
             public function Connect()
@@ -50,7 +51,30 @@
                 if($this->ReturnHandle()) return 0;
                 else return mysqli_close($this->ReturnHandle());
             }
+        }
+        class Table
+        {
+            private $Name;
+            private $ColumnDatas;
 
+            public function __construct(Connection $connection, string $name, string $columnsDatas)
+            {
+                $this->Name = $name;
+                $this->ColumnDatas = $columnsDatas;
+                $connection->Query("CREATE TABLE IF NOT EXISTS `$name` ($columnsDatas)");
+            }
+
+            public function SetTableName(Connection $connection, string $newName)
+            {
+                $current_name = $this->Name;
+                $connection->Query("RENAME TABLE $current_name TO $newName");
+                $this->Name = $newName;
+            }
+
+            public function GetTableName(Connection $connection)
+            {
+                return $this->Name;
+            }
         }
     }
 ?>
